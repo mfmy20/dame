@@ -1,23 +1,75 @@
 from tkinter import *
-import random,copy
+from random import *
+from copy import *
+launcher = Tk()
+launcher.title('Launcher')
+launcher.geometry('200x100+900+450')
 
 player = "white"
 profondeur = 3
+premier_coup = True
+     
+menubar = Menu(launcher)
+def facile():
+    global profondeur
+    profondeur = 2
+
+def moyen():
+    global profondeur
+    profondeur = 3
+
+def difficile():
+    global profondeur
+    profondeur = 4
     
+def impossible():
+    global profondeur
+    profondeur = 5
+
+def joueur():
+    global player
+    player = Value.get()
+
+def launch():
+    launcher.quit()
+    launcher.destroy()
+    
+difficulte = Menu(menubar, tearoff=0)
+difficulte.add_command(label="Facile", command=facile)
+difficulte.add_command(label="Moyen", command=moyen)
+difficulte.add_command(label="Difficile", command=difficile)
+difficulte.add_command(label="Impossible", command=impossible)
+menubar.add_cascade(label="Difficulté", menu=difficulte)
+
+label = Label(launcher, text="choisissez votre couleur:")
+label.pack()
+
+Value = StringVar() 
+bouton1 = Radiobutton(launcher, text="Blanc", variable=Value, value="white", command=joueur)
+bouton2 = Radiobutton(launcher, text="Noir", variable=Value, value="black", command = joueur)
+bouton1.pack()
+bouton2.pack()
+
+bouton=Button(launcher, text="Lance le jeu", command=launch)
+bouton.pack()
+
+launcher.config(menu=menubar)
+launcher.mainloop()
 fenetre = Tk()
-list_jeton_noir = []
+fenetre.title('Plateau')
+list_jeton_noir = []   #valeur de base
 list_jeton_blanc = []
 list_jeton = []
 case = []
 jeton_doit_joue = []
 
-def MinMax():
+def MinMax(Rafle): #Lancement de l'IA
     IA = True
     list_jeton_simule = []
     jeton_blanc_simule = []
     jeton_noir_simule = []
-    maxval = -100000000
-    for i in list_jeton_blanc:
+    maxval = -100000000             
+    for i in list_jeton_blanc:      #générent les listes de simulations 
         coord = plateau.coords(i)
         tag = plateau.gettags(i)
         if tag.count('dame'):
@@ -45,24 +97,30 @@ def MinMax():
         jeton.append(coord[1])
         jeton.append("black")
         jeton.append(tag)
-        jeton_noir_simule.append(jeton)
+        jeton_noir_simule.append(jeton)      
         list_jeton_simule.append(jeton)
     doit_IA_manger(IA,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
     if a_manger:
         for d in a_manger:
-            list_jeton_simule2 = []
-            jeton_blanc_simule2 = []
-            jeton_noir_simule2 = []
-            for c in jeton_blanc_simule:
-                list_jeton_simule2.append(copy.deepcopy(c))
-                jeton_blanc_simule2.append(copy.deepcopy(c))
-            for c in jeton_blanc_simule:
-                list_jeton_simule2.append(copy.deepcopy(c))
-                jeton_blanc_simule2.append(copy.deepcopy(c))
-            val = Min(d,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-            if val > maxval or val == maxval and random.randint(1,2) == 2:
-                maxval = val
-                MeilleurCoup = d
+            if Rafle:
+                if d[0][0] == Rafle:
+                    list_jeton_simule2 = deepcopy(list_jeton_simule)
+                    jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
+                    jeton_noir_simule2 = deepcopy(jeton_noir_simule)
+                    d2 = deepcopy(d)
+                    val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
+                    if val > maxval or (val == maxval and randint(1,2) == 2):
+                        maxval = val
+                        MeilleurCoup = d
+            else:
+                list_jeton_simule2 = deepcopy(list_jeton_simule)
+                jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
+                jeton_noir_simule2 = deepcopy(jeton_noir_simule)
+                d2 = deepcopy(d)
+                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
+                if val > maxval or (val == maxval and randint(1,2) == 2):
+                    maxval = val
+                    MeilleurCoup = d
     else:
         if player == "white":
             jeton_doit_joue = jeton_noir_simule.copy()
@@ -77,28 +135,20 @@ def MinMax():
                 action.append(None)
                 action.append(d[0])
                 action.append(d[1])
-                list_jeton_simule2 = []
-                jeton_blanc_simule2 = []
-                jeton_noir_simule2 = []
-                for c in jeton_blanc_simule:
-                    list_jeton_simule2.append(copy.deepcopy(c))
-                    jeton_blanc_simule2.append(copy.deepcopy(c))
-                for c in jeton_blanc_simule:
-                    list_jeton_simule2.append(copy.deepcopy(c))
-                    jeton_blanc_simule2.append(copy.deepcopy(c))
-                val = Min(action,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-                if val > maxval or val == maxval and random.randint(1,2) == 2:
+                list_jeton_simule2 = deepcopy(list_jeton_simule)
+                jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
+                jeton_noir_simule2 = deepcopy(jeton_noir_simule)
+                action2 = deepcopy(action)
+                val = Min(action2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
+                if val > maxval or (val == maxval and randint(1,2) == 2):
                     maxval = val
                     MeilleurCoup = action
-    print(MeilleurCoup)
     return MeilleurCoup
 
 def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
     IA = False
     minval = 10000000000
     maxval = -10000000000
-    for c in list_jeton_simule:
-        c = c.copy()
     if d[1]:
         color = d[1][3]
         d[0][1] = d[2]
@@ -113,17 +163,12 @@ def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
         jeton_doit_joue = doit_IA_manger(not IA,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
         if a_manger:
             for d in a_manger:
-                list_jeton_simule2 = []
-                jeton_blanc_simule2 = []
-                jeton_noir_simule2 = []
-                for c in jeton_blanc_simule:
-                    list_jeton_simule2.append(copy.deepcopy(c))
-                    jeton_blanc_simule2.append(copy.deepcopy(c))
-                for c in jeton_blanc_simule:
-                    list_jeton_simule2.append(copy.deepcopy(c))
-                    jeton_blanc_simule2.append(copy.deepcopy(c))
-                val = Min(d,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur)
-                if val > maxval or val == maxval and random.randint(1,2) == 2:
+                list_jeton_simule2 = deepcopy(list_jeton_simule)
+                jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
+                jeton_noir_simule2 = deepcopy(jeton_noir_simule)
+                d2 = deepcopy(d)
+                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur)
+                if val > maxval or (val == maxval and randint(1,2) == 2):
                     maxval = val
             return maxval
     else:
@@ -138,21 +183,22 @@ def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
             jeton_doit_joue = jeton_noir_simule.copy()
         jeton_doit_joue = verification_IA(jeton_doit_joue,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
     if profondeur == 0 or not jeton_blanc_simule or not jeton_noir_simule or not jeton_doit_joue:
-        return evaluer(list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
+        if (player == "white" and not jeton_noir_simule) or (player == "black" and not jeton_blanc_simule):
+            evalu = -5000
+        elif (player == "white" and (not jeton_blanc_simule or not jeton_doit_joue)) or (player == "black" and (not jeton_blanc_simule or not jeton_doit_joue)):
+            evalu = 5000
+        else:
+            evalu = 0
+        return evaluer(list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,evalu)
     else:
         if a_manger:
             for d in a_manger:
-                list_jeton_simule2 = []
-                jeton_blanc_simule2 = []
-                jeton_noir_simule2 = []
-                for c in jeton_blanc_simule:
-                    list_jeton_simule2.append(copy.deepcopy(c))
-                    jeton_blanc_simule2.append(copy.deepcopy(c))
-                for c in jeton_blanc_simule:
-                    list_jeton_simule2.append(copy.deepcopy(c))
-                    jeton_blanc_simule2.append(copy.deepcopy(c))
-                val = Min(d,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-                if val > maxval or val == maxval and random.randint(1,2) == 2:
+                list_jeton_simule2 = deepcopy(list_jeton_simule)
+                jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
+                jeton_noir_simule2 = deepcopy(jeton_noir_simule)
+                d2 = deepcopy(d)
+                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
+                if val > maxval or (val == maxval and randint(1,2) == 2):
                     minval = val
         else:
             for c in jeton_doit_joue:
@@ -163,17 +209,12 @@ def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
                     action.append(None)
                     action.append(d[0])
                     action.append(d[1])
-                    list_jeton_simule2 = []
-                    jeton_blanc_simule2 = []
-                    jeton_noir_simule2 = []
-                    for c in jeton_blanc_simule:
-                        list_jeton_simule2.append(copy.deepcopy(c))
-                        jeton_blanc_simule2.append(copy.deepcopy(c))
-                    for c in jeton_blanc_simule:
-                        list_jeton_simule2.append(copy.deepcopy(c))
-                        jeton_blanc_simule2.append(copy.deepcopy(c))
-                    val = Max(action,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-                    if val < minval or val == minval and random.randint(1,2) == 2:
+                    list_jeton_simule2 = deepcopy(list_jeton_simule)
+                    jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
+                    jeton_noir_simule2 = deepcopy(jeton_noir_simule)
+                    action2 = deepcopy(action)
+                    val = Max(action2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
+                    if val < minval or (val == minval and randint(1,2) == 2):
                         minval = val
     return minval
 
@@ -181,8 +222,6 @@ def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
     IA = True
     minval = 10000000000
     maxval = -10000000000
-    for c in list_jeton_simule:
-        c = c.copy()
     if d[1]:
         d[0][1] = d[2]
         d[0][2] = d[3]
@@ -195,17 +234,12 @@ def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
         jeton_doit_joue = doit_IA_manger(not IA,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
         if a_manger:
             for d in a_manger:
-                list_jeton_simule2 = []
-                jeton_blanc_simule2 = []
-                jeton_noir_simule2 = []
-                for c in jeton_blanc_simule:
-                    list_jeton_simule2.append(copy.deepcopy(c))
-                    jeton_blanc_simule2.append(copy.deepcopy(c))
-                for c in jeton_blanc_simule:
-                    list_jeton_simule2.append(copy.deepcopy(c))
-                    jeton_blanc_simule2.append(copy.deepcopy(c))
-                val = Min(d,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur)
-                if val < minval or val == minval and random.randint(1,2) == 2:
+                list_jeton_simule2 = deepcopy(list_jeton_simule)
+                jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
+                jeton_noir_simule2 = deepcopy(jeton_noir_simule)
+                d2 = deepcopy(d)
+                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur)
+                if val < minval or (val == minval and randint(1,2) == 2):
                     minval = val
             return minval
     else:
@@ -220,22 +254,23 @@ def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
             jeton_doit_joue = jeton_blanc_simule.copy()
         jeton_doit_joue = verification_IA(jeton_doit_joue,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
     if profondeur == 0 or not jeton_blanc_simule or not jeton_noir_simule or not jeton_doit_joue:
-        return evaluer(list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
+        if (player == "white" and not jeton_blanc_simule) or (player == "black" and not jeton_noir_simule):
+            evalu = 5000
+        elif (player == "white" and (not jeton_noir_simule or not jeton_doit_joue)) or (player == "black" and (not jeton_noir_simule or not jeton_doit_joue)):
+            evalu = -5000
+        else:
+            evalu = 0
+        return evaluer(list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,evalu)
     else:
-       if a_manger:
-        for d in a_manger:
-            list_jeton_simule2 = []
-            jeton_blanc_simule2 = []
-            jeton_noir_simule2 = []
-            for c in jeton_blanc_simule:
-                list_jeton_simule2.append(copy.deepcopy(c))
-                jeton_blanc_simule2.append(copy.deepcopy(c))
-            for c in jeton_blanc_simule:
-                list_jeton_simule2.append(copy.deepcopy(c))
-                jeton_blanc_simule2.append(copy.deepcopy(c))
-            val = Min(d,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-            if val > maxval or val == maxval and random.randint(1,2) == 2:
-                maxval = val
+        if a_manger:
+            for d in a_manger:
+                list_jeton_simule2 = deepcopy(list_jeton_simule)
+                jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
+                jeton_noir_simule2 = deepcopy(jeton_noir_simule)
+                d2 = deepcopy(d)
+                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
+                if val > maxval or (val == maxval and randint(1,2) == 2):
+                    maxval = val
         else:
             for c in jeton_doit_joue:
                 case_possible = case_jouable_IA(c,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
@@ -245,22 +280,16 @@ def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
                     action.append(None)
                     action.append(d[0])
                     action.append(d[1])
-                    list_jeton_simule2 = []
-                    jeton_blanc_simule2 = []
-                    jeton_noir_simule2 = []
-                    for c in jeton_blanc_simule:
-                        list_jeton_simule2.append(copy.deepcopy(c))
-                        jeton_blanc_simule2.append(copy.deepcopy(c))
-                    for c in jeton_blanc_simule:
-                        list_jeton_simule2.append(copy.deepcopy(c))
-                        jeton_blanc_simule2.append(copy.deepcopy(c))
-                    val = Min(action,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-                    if val > maxval or val == maxval and random.randint(1,2) == 2:
+                    list_jeton_simule2 = deepcopy(list_jeton_simule)
+                    jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
+                    jeton_noir_simule2 = deepcopy(jeton_noir_simule)
+                    action2 = deepcopy(action)
+                    val = Min(action2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
+                    if val > maxval or (val == maxval and randint(1,2) == 2):
                         maxval = val
     return maxval
 
-def evaluer(list_jeton_simule,jeton_blanc_simule,jeton_noir_simule):
-    val = 0
+def evaluer(list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,val):
     for c in jeton_blanc_simule:
         tag = c[4]
         if player == "white":
@@ -526,8 +555,6 @@ def dames_IA(d):
     elif color == "black" and coord[1] == 900:
         d[4] = 'dame'
 
-#############################################################################################################################################################################################################################################
-
 def doit_noir_manger():
     global a_manger
     a_manger = []
@@ -728,7 +755,6 @@ def poser_jeton(event):
             list_jeton.remove(C[1])
             plateau.delete(C[1])
             plateau.itemconfig(C[0],outline="",width = 0)
-            dames(J)
             color = plateau.itemcget(C[0],"fill")
             if color == "black":
                 jeton_doit_joue = doit_noir_manger()
@@ -742,8 +768,10 @@ def poser_jeton(event):
                             plateau.itemconfig(c,outline="orange",width = 4)
                         plateau.bind("<Button-1>",grap)
                 if not grapper:
+                    dames(J)
                     fin_tour()
             else:
+                dames(J)
                 fin_tour()
         else:
             plateau.unbind("<ButtonRelease>")
@@ -777,66 +805,11 @@ def poser_jeton(event):
             plateau.itemconfig(c,outline="orange",width = 4)
         plateau.bind("<Button-1>",grap) 
             
-        
-
 def verification_manger(X,Y,a_manger):
     for c in a_manger:
         if J == c[0] and c[2] <= X <= c[2] + 100 and c[3] <= Y <= c[3] + 100:
             return c
     return None
-
-def verification_case(X,Y):
-    tag = plateau.gettags(J)
-    k = 1
-    c = []
-    while k <= 9:
-        if (coord_J[0] <= X-100*k <= coord_J[0]+100 or coord_J[0] <= X+100*k <= coord_J[0]+100) and (coord_J[1] <= Y-100*k <= coord_J[1]+100 or coord_J[1] <= Y+100*k <= coord_J[1]+100):
-            if coord_J[0] <= X-100*k <= coord_J[0]+100:
-                c.append(coord_J[0]+100*k)
-            elif coord_J[0] <= X+100*k <= coord_J[0]+100:
-                c.append(coord_J[0]-100*k)
-            if coord_J[1] <= Y-100*k <= coord_J[1]+100:
-                c.append(coord_J[1]+100*k)
-            elif coord_J[1] <= Y+100*k <= coord_J[1]+100:
-                c.append(coord_J[1]-100*k)
-            return c
-        if tag.count('dame'):
-            k += 1
-        else:
-            break
-    return None
-
-def dames(d):
-    coord = plateau.coords(d)
-    color = plateau.itemcget(d,"fill")
-    if color == "white" and coord[1] == 0:
-        plateau.itemconfig(d,tag = "dame")
-    elif color == "black" and coord[1] == 900:
-        plateau.itemconfig(d,tag = "dame")
-        
-def fin_tour():
-    global couleur,jeton_doit_joue
-    if couleur == "blanc":
-        couleur = "noir"
-        z = MinMax()
-        coord = plateau.coords(z[0][0])
-        print(coord,list_jeton)
-        jeton_doit_joue = doit_noir_manger()
-        if jeton_doit_joue:
-            None
-        else:
-            jeton_doit_joue = list_jeton_noir.copy()       
-    else:
-        couleur = "blanc"
-        jeton_doit_joue = doit_blanc_manger()
-        if jeton_doit_joue:
-            None
-        else:
-            jeton_doit_joue = list_jeton_blanc.copy()
-    jeton_doit_joue = verification_jeton(jeton_doit_joue)
-    for c in jeton_doit_joue:
-        plateau.itemconfig(c,outline="orange",width = 4)
-    plateau.bind("<Button-1>",grap)      
 
 def case_jouable():
     color = plateau.itemcget(J,"fill")
@@ -890,7 +863,140 @@ def case_jouable():
             if coord2[0] == c[0] and coord2[1] == c[1]:
                 case_possible.remove(c)
     return case_possible
-           
+
+def verification_case(X,Y):
+    tag = plateau.gettags(J)
+    k = 1
+    c = []
+    while k <= 9:
+        if (coord_J[0] <= X-100*k <= coord_J[0]+100 or coord_J[0] <= X+100*k <= coord_J[0]+100) and (coord_J[1] <= Y-100*k <= coord_J[1]+100 or coord_J[1] <= Y+100*k <= coord_J[1]+100):
+            if coord_J[0] <= X-100*k <= coord_J[0]+100:
+                c.append(coord_J[0]+100*k)
+            elif coord_J[0] <= X+100*k <= coord_J[0]+100:
+                c.append(coord_J[0]-100*k)
+            if coord_J[1] <= Y-100*k <= coord_J[1]+100:
+                c.append(coord_J[1]+100*k)
+            elif coord_J[1] <= Y+100*k <= coord_J[1]+100:
+                c.append(coord_J[1]-100*k)
+            return c
+        if tag.count('dame'):
+            k += 1
+        else:
+            break
+    return None
+
+def dames(d):
+    coord = plateau.coords(d)
+    color = plateau.itemcget(d,"fill")
+    if color == "white" and coord[1] == 0:
+        plateau.itemconfig(d,tag = "dame")
+    elif color == "black" and coord[1] == 900:
+        plateau.itemconfig(d,tag = "dame")
+        
+def fin_tour():
+    global couleur,jeton_doit_joue,premier_coup
+    if couleur == "white":
+        couleur = "black"
+        jeton_doit_joue = doit_noir_manger()
+        if jeton_doit_joue:
+            None
+        else:
+            jeton_doit_joue = list_jeton_noir.copy()       
+    else:
+        couleur = "white"
+        jeton_doit_joue = doit_blanc_manger()
+        if jeton_doit_joue:
+            None
+        else:
+            jeton_doit_joue = list_jeton_blanc.copy()
+    jeton_doit_joue = verification_jeton(jeton_doit_joue)
+    if not list_jeton_blanc or (not jeton_doit_joue and couleur == "white"):
+        perdant = "white"
+        fin_jeu(perdant)
+    elif not list_jeton_noir or (not jeton_doit_joue and couleur == "black"):
+        perdant = "black"
+        fin_jeu(perdant)
+    else:
+        if player == couleur:
+            premier_coup = False
+            plateau.bind("<Button-1>",grap)
+            for c in jeton_doit_joue:
+                plateau.itemconfig(c,outline="orange",width = 4)
+        else:
+            if premier_coup == True:
+                premier_coup = False
+                Coup = []
+                jeton = []
+                for c in list_jeton_blanc:
+                    coord = plateau.coords(c)
+                    if coord[0] == 900 and coord[1] == 600:
+                        jeton.append(c)
+                jeton.append(coord)
+                Coup.append(jeton)
+                Coup.append(None)
+                Coup.append(800)
+                Coup.append(500)
+                Poser_CoupIA(Coup)
+            else:
+                Coup = MinMax(None)
+                Poser_CoupIA(Coup)
+    
+def Poser_CoupIA(Coup):
+    global jeton_doit_joue
+    grapper = False
+    plateau.tag_raise(Coup[0][0])
+    if Coup[1]:
+        coord = plateau.coords(Coup[0][0])
+        plateau.move(Coup[0][0],Coup[2]-coord[0],Coup[3]-coord[1])
+        color = plateau.itemcget(Coup[1][0],"fill")
+        if color == "white":
+            list_jeton_blanc.remove(Coup[1][0])
+        else:
+            list_jeton_noir.remove(Coup[1][0])
+        list_jeton.remove(Coup[1][0])
+        plateau.delete(Coup[1][0])
+        color = plateau.itemcget(Coup[0][0],"fill")
+        if color == "black":
+                jeton_doit_joue = doit_noir_manger()
+        else:
+            jeton_doit_joue = doit_blanc_manger()
+        if a_manger:
+            for d in a_manger:
+                if Coup[0][0] == d[0]:
+                    grapper = True
+                    Coup = MinMax(Coup[0][0])
+                    Poser_CoupIA(Coup)
+            if not grapper:
+                dames(Coup[0][0])
+                fin_tour()
+        else:
+            dames(Coup[0][0])
+            fin_tour()
+    else:
+        coord = plateau.coords(Coup[0][0])
+        plateau.move(Coup[0][0],Coup[2]-coord[0],Coup[3]-coord[1])
+        dames(Coup[0][0])
+        fin_tour()    
+
+def fin_jeu(perdant):
+    if perdant == "white":
+        text_perdant="Les noirs ont gagné"
+        text_perdant="Les blancs ont perdu"
+    else:
+        text_gagnant="Les blancs ont gagné"
+        text_perdant="Les noirs ont perdu"
+    fin = Toplevel()
+    fin.title("Fin")
+    msg = Message(fin, text=text_gagnant)
+    msg_2 = Message(fin, text=text_perdant)
+    msg.pack()
+    msg_2.pack()
+    plateau.bind("<Button-1>",exit_game)
+
+def exit_game(event):
+    fenetre.destroy()
+    exit()
+          
 plateau = Canvas(fenetre,width=1000,height=1000)
 colone = 0
 couleur = "#F6DDCC"
@@ -920,9 +1026,6 @@ while colone < 10:
        couleur = "#F6DDCC"
        plateau.create_rectangle(colone*100,ligne*100,colone*100+100,ligne*100+100,fill=couleur)
     colone += 1
-
 fin_tour()
-
 plateau.pack()
-
 fenetre.mainloop()
