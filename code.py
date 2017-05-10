@@ -3,14 +3,14 @@ from random import *
 from copy import *
 launcher = Tk()
 launcher.title('Launcher')
-launcher.geometry('200x100+900+450')
+launcher.geometry('200x100+900+450') #le 200*100 représente la taille tandis que 900+450 répresente la postion de départ
 
-player = "white"
+player = "white" #variable de début pour éviter tout bug
 profondeur = 3
 premier_coup = True
      
-menubar = Menu(launcher)
-def facile():
+menubar = Menu(launcher) #obligé pour crée un menu glissant
+def facile():              # fonction transformant les variables de bases
     global profondeur
     profondeur = 2
 
@@ -30,7 +30,7 @@ def joueur():
     global player
     player = Value.get()
 
-def launch():
+def launch(): #permet de lancer le jeu en fermant le launcher
     launcher.quit()
     launcher.destroy()
     
@@ -39,13 +39,13 @@ difficulte.add_command(label="Facile", command=facile)
 difficulte.add_command(label="Moyen", command=moyen)
 difficulte.add_command(label="Difficile", command=difficile)
 difficulte.add_command(label="Impossible", command=impossible)
-menubar.add_cascade(label="Difficulté", menu=difficulte)
+menubar.add_cascade(label="Difficulté", menu=difficulte) #crée le menu glissant
 
 label = Label(launcher, text="choisissez votre couleur:")
 label.pack()
 
 Value = StringVar() 
-bouton1 = Radiobutton(launcher, text="Blanc", variable=Value, value="white", command=joueur)
+bouton1 = Radiobutton(launcher, text="Blanc", variable=Value, value="white", command=joueur) #groupe de boutton
 bouton2 = Radiobutton(launcher, text="Noir", variable=Value, value="black", command = joueur)
 bouton1.pack()
 bouton2.pack()
@@ -64,7 +64,7 @@ case = []
 jeton_doit_joue = []
 
 def MinMax(Rafle): #Lancement de l'IA
-    IA = True
+    IA = True             #valeur de base de l'IA
     list_jeton_simule = []
     jeton_blanc_simule = []
     jeton_noir_simule = []
@@ -99,7 +99,7 @@ def MinMax(Rafle): #Lancement de l'IA
         jeton.append(tag)
         jeton_noir_simule.append(jeton)      
         list_jeton_simule.append(jeton)
-    doit_IA_manger(IA,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
+    doit_IA_manger(IA,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule) #permet de choisir quel action à simuler
     if a_manger:
         for d in a_manger:
             if Rafle:
@@ -135,15 +135,15 @@ def MinMax(Rafle): #Lancement de l'IA
                 action.append(None)
                 action.append(d[0])
                 action.append(d[1])
-                list_jeton_simule2 = deepcopy(list_jeton_simule)
+                list_jeton_simule2 = deepcopy(list_jeton_simule)#permet de sauvegarder l’intérieur des listes
                 jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
                 jeton_noir_simule2 = deepcopy(jeton_noir_simule)
                 action2 = deepcopy(action)
-                val = Min(action2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
+                val = Min(action2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)#la valeur retourner par la fonction min sera égale à val
                 if val > maxval or (val == maxval and randint(1,2) == 2):
                     maxval = val
                     MeilleurCoup = action
-    return MeilleurCoup
+    return MeilleurCoup #renvoie le coup à joué
 
 def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
     IA = False
@@ -162,7 +162,7 @@ def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
         dames_IA(d[0])
         jeton_doit_joue = doit_IA_manger(not IA,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
         if a_manger:
-            for d in a_manger:
+            for d in a_manger: #au cas ou un il y a une rafle on reste sur une fonction max
                 list_jeton_simule2 = deepcopy(list_jeton_simule)
                 jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
                 jeton_noir_simule2 = deepcopy(jeton_noir_simule)
@@ -218,7 +218,7 @@ def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
                         minval = val
     return minval
 
-def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
+def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur): #même chose que les deux précedents
     IA = True
     minval = 10000000000
     maxval = -10000000000
@@ -289,17 +289,17 @@ def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
                         maxval = val
     return maxval
 
-def evaluer(list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,val):
-    for c in jeton_blanc_simule:
-        tag = c[4]
+def evaluer(list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,val): 
+    for c in jeton_blanc_simule: 
+        tag = c[4] #on prend le tag du jeton
         if player == "white":
-            if tag == 'dame':
-                val -= 3
+            if tag == 'dame': #on comptabilise les jetons dames et normaux
+                val -= 3 #avec des valeurs négatives si c'est les jetons du joueurs 
             else:
                 val -= 1
         else:
             if tag == 'dame':
-                val += 3
+                val += 3 #avec des valeurs positives positives si c'est les jetons de l'IA
             else:
                 val += 1
     for c in jeton_noir_simule:
@@ -317,7 +317,7 @@ def evaluer(list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,val):
     return val
 
 def doit_IA_manger(IA,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule):
-    global a_manger
+    global a_manger #exectement le même principe que les fonctions doit_noir_manger et doit_blanc_manger
     a_manger = []
     jeton_doit_joue = []
     if (IA and player == "white") or (not IA and player == "black"):
@@ -415,7 +415,7 @@ def doit_IA_manger(IA,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule):
                         break
         return jeton_doit_joue
 
-def verification_IA(jeton_doit_joue,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule):
+def verification_IA(jeton_doit_joue,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule): #meme principe que la fonction vérifié
     jeton_suppr = []
     for c in jeton_doit_joue:
         coord = []
@@ -484,7 +484,7 @@ def verification_IA(jeton_doit_joue,list_jeton_simule,jeton_blanc_simule,jeton_n
         jeton_doit_joue.remove(c)
     return jeton_doit_joue
 
-def case_jouable_IA(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule):
+def case_jouable_IA(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule): #même principe que la fonction case_jouable
     color = d[3]
     tag = d[4]
     case_possible =[]
@@ -545,7 +545,7 @@ def case_jouable_IA(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule):
             case_possible.remove(c)
     return case_possible
 
-def dames_IA(d):
+def dames_IA(d): #même principe que dames
     coord = []
     coord.append(d[1])
     coord.append(d[2])
@@ -555,7 +555,7 @@ def dames_IA(d):
     elif color == "black" and coord[1] == 900:
         d[4] = 'dame'
 
-def doit_noir_manger():
+def doit_noir_manger(): #même principe que doit_blanc_manger
     global a_manger
     a_manger = []
     jeton_doit_joue = []
@@ -602,25 +602,25 @@ def doit_noir_manger():
 
 def doit_blanc_manger():
     global a_manger
-    a_manger = []
-    jeton_doit_joue = []
-    for c in list_jeton_blanc:
-        coord_blanc  = plateau.coords(c)
-        tag = plateau.gettags(c)
-        for d in list_jeton_noir:
+    a_manger = [] #création d'une liste vide pour contenir les pièces qui doivent mangent, celle qui seront manger et les coordonnées d'atterissage
+    jeton_doit_joue = [] #création d'une liste vide pour contenir les jetons qui devront joué
+    for c in list_jeton_blanc: #pour tout les jetons blancs
+        coord_blanc  = plateau.coords(c) #leurs coordonnées
+        tag = plateau.gettags(c) #et leurs tag (pour savoir si se sont des dames)
+        for d in list_jeton_noir: #pour tout les jetons noirs
             coord_noir = plateau.coords(d)
             k = 1
-            while k <= 9:
-                ne_peu = False
+            while k <= 9: #au cas où c'est une dame
+                ne_peu = False #les 2 conditions suivantes permettent de vérifié que il y a bien un jeton noir à porté et que sa n'atterrisse pas dans une case hors du plateau
                 if (coord_blanc[0] == coord_noir[0]-100*k or coord_blanc[0] == coord_noir[0]+100*k) and (coord_blanc[1] == coord_noir[1]-100*k or coord_blanc[1] == coord_noir[1]+100*k):
                     if (coord_blanc[0]+100*k == coord_noir[0]  and coord_blanc[0]+100*(k+1) <= 900) or (coord_blanc[0]-100*k == coord_noir[0] and coord_blanc[0]-100*(k+1 ) >= 0) or (coord_blanc[1]+100*k == coord_noir[0] and coord_blanc[1]+100*(k+1) <= 900) or (coord_blanc[1]+100*k == coord_noir[0] and coord_blanc[1]-100*(k+1) >= 0):
-                        for e in list_jeton:
+                        for e in list_jeton: #cette boucle permet de vérifié qu'il n'y pas un jeton derrière le jeton pouvant être pris
                             coord_sec = plateau.coords(e)
                             if (coord_blanc[0] == coord_noir[0]-100*k == coord_sec[0]-100*(k+1) or coord_blanc[0] == coord_noir[0]+100*k == coord_sec[0]+100*(k+1)) and (coord_blanc[1] == coord_noir[1]-100*k == coord_sec[1]-100*(k+1) or coord_blanc[1] == coord_noir[1]+100*k == coord_sec[1]+100*(k+1)):
                                 ne_peu = True
                             if k > 1 and (coord_blanc[0] == coord_noir[0]-100*k == coord_sec[0]-100*(k-1) or coord_blanc[0] == coord_noir[0]+100*k == coord_sec[0]+100*(k-1)) and (coord_blanc[1] == coord_noir[1]-100*k == coord_sec[1]-100*(k-1) or coord_blanc[1] == coord_noir[1]+100*k == coord_sec[1]+100*(k-1)):
                                 ne_peu = True
-                        if not ne_peu:
+                        if not ne_peu: #si le jeton peut être pris le numéro du jeton prenant est enregistré ainsi que celui pris et avec les coordonnées d'atterrissage
                             if coord_noir[0] == coord_blanc[0]-100*k:
                                 X = coord_blanc[0]-100*(k+1)
                             else:
@@ -639,27 +639,27 @@ def doit_blanc_manger():
                             if X < 0 or Y < 0 or X > 900 or Y > 900:
                                 a_manger.remove(C)
                                 jeton_doit_joue.remove(c)
-                if tag.count('dame'):
+                if tag.count('dame'): #si c'est une dame on vérifié pour les cases suivantes
                     k += 1
-                else:
+                else: #sinon on stop
                     break
-    return jeton_doit_joue  
+    return jeton_doit_joue  #renvoie les jetons devants êtres jouent
 
 def verification_jeton(jeton_doit_joue):
-    jeton_suppr = []
+    jeton_suppr = [] #crée une liste qui supprimera les jetons de jeton_doit_joue
     for c in jeton_doit_joue:
         coord = plateau.coords(c)
         couleur_jeton1 = plateau.itemcget(c,"fill")
         tag = plateau.gettags(c)
         nbr_case = 0
-        if tag.count('dame'):
+        if tag.count('dame'): 
             possibilite = 4
             for e in list_jeton:
                 couleur_jeton2 = plateau.itemcget(e,"fill")
                 coord_2 = plateau.coords(e)
-                if couleur_jeton1 == couleur_jeton2 and (coord[0] == coord_2[0]-100 or coord[0] == coord_2[0]+100) and (coord[1] == coord_2[1]-100 or coord[1] == coord_2[1]+100):
+                if couleur_jeton1 == couleur_jeton2 and (coord[0] == coord_2[0]-100 or coord[0] == coord_2[0]+100) and (coord[1] == coord_2[1]-100 or coord[1] == coord_2[1]+100): #regarde si les cases disponnible pour la dame ne sont pas pris par des jetons allié
                     possibilite -= 1
-                elif couleur_jeton1 != couleur_jeton2 and (coord[0] == coord_2[0]-100 or coord[0] == coord_2[0]+100) and (coord[1] == coord_2[1]-100 or coord[1] == coord_2[1]+100):
+                elif couleur_jeton1 != couleur_jeton2 and (coord[0] == coord_2[0]-100 or coord[0] == coord_2[0]+100) and (coord[1] == coord_2[1]-100 or coord[1] == coord_2[1]+100): #ou part des jetons ennemies imprennable
                     if coord[0]+200 == coord_2[0]+100 <= 900 or coord[0]-200 == coord_2[0]-100 >= 0 or coord[1]+200 == coord_2[1]+100 <= 900 or coord[1]-200 == coord_2[1]-100 >= 0:
                         for f in list_jeton:
                             coord_sec = plateau.coords(f)
@@ -670,13 +670,13 @@ def verification_jeton(jeton_doit_joue):
             for e in list_jeton:
                 couleur_jeton2 = plateau.itemcget(e,"fill")
                 coord_2 = plateau.coords(e)
-                if couleur_jeton1 == "white" and (coord[0] == coord_2[0]-100 or coord[0] == coord_2[0]+100) and coord[1] == coord_2[1]+100:
+                if couleur_jeton1 == "white" and (coord[0] == coord_2[0]-100 or coord[0] == coord_2[0]+100) and coord[1] == coord_2[1]+100: #regarde si le pions blanc peut avancé
                     if couleur_jeton2 == "white":
                         possibilite -= 1
-                elif couleur_jeton1 == "black" and (coord[0] == coord_2[0]-100 or coord[0] == coord_2[0]+100) and coord[1] == coord_2[1]-100:
+                elif couleur_jeton1 == "black" and (coord[0] == coord_2[0]-100 or coord[0] == coord_2[0]+100) and coord[1] == coord_2[1]-100: #regarde si le pions noir peut avancé
                     if couleur_jeton2 == "black":
                         possibilite -= 1
-                if couleur_jeton1 != couleur_jeton2 and (coord[0] == coord_2[0]-100 or coord[0] == coord_2[0]+100) and (coord[1] == coord_2[1]-100 or coord[1] == coord_2[1]+100):
+                if couleur_jeton1 != couleur_jeton2 and (coord[0] == coord_2[0]-100 or coord[0] == coord_2[0]+100) and (coord[1] == coord_2[1]-100 or coord[1] == coord_2[1]+100): #vérifie si il peut prendre le jeton adverse ou pas
                     if couleur_jeton1 == "white" and coord[1] == coord_2[1]-100 and coord[1]-200 >= 0:
                         possibilite += 1
                     if couleur_jeton1 == "black" and coord[1] == coord_2[1]+100 and coord[1]+200 <= 900:
@@ -688,7 +688,7 @@ def verification_jeton(jeton_doit_joue):
                                 possibilite -= 1
                     else:
                         possibilite -= 1
-        for g in case:
+        for g in case: #regarde si il à bien 4 case disponible autour de lui sinon, il lui enlève des possibilité
                 coord_case = plateau.coords(g)
                 if (coord[0]-100 == coord_case[0] or coord[0]+100 == coord_case[0]) and (coord[1]-100 == coord_case[1] or coord[1]+100 == coord_case[1]):
                     nbr_case += 1
@@ -698,21 +698,21 @@ def verification_jeton(jeton_doit_joue):
             possibilite -= 1
         if nbr_case == 1:
             possibilite -= 1
-        if possibilite <= 0:
+        if possibilite <= 0: #si le jetons n'a pas de possibilité de joué il l'enlève de se pouvant être joué
                 jeton_suppr.append(c)
     for c in jeton_suppr:
         jeton_doit_joue.remove(c)
     return jeton_doit_joue
           
-def grap(event):
+def grap(event): #prend les coordonné de l'endroit attrapé
     coord = []
     coord.append(event.x)
     coord.append(event.y)
     jeu(coord)
 
-def jeu(coord):
+def jeu(coord): #vérifie qu'il clic bien sur un jeton et enléve le contour orange des autres
     global J,coord_J
-    J = take_jeton(coord)
+    J = take_jeton(coord) 
     if J:
         coord_J = plateau.coords(J)
         for c in jeton_doit_joue:
@@ -722,25 +722,25 @@ def jeu(coord):
 
 def take_jeton(coord):
     for c in jeton_doit_joue:
-        coord_jeton = plateau.coords(c)
+        coord_jeton = plateau.coords(c) #vérifie que les coordonnés du jeton correspond
         if coord_jeton[0] <= coord[0] <= coord_jeton[0]+100 and coord_jeton[1] <= coord[1] <= coord_jeton[1]+100:
             return c
     return None
 
-def move(event):
+def move(event): #permet de déplacer le jeton
     J_coord = plateau.coords(J)
     plateau.tag_raise(J)
-    plateau.move(J,event.x-J_coord[0],event.y-J_coord[1])
+    plateau.move(J,event.x-J_coord[0],event.y-J_coord[1]) #certainement la fonction qui est la cause du bug d'avoir un jeton entre 4 cases
     plateau.bind("<ButtonRelease>",poser_jeton)
 
-def poser_jeton(event):
+def poser_jeton(event): 
     global jeton_doit_joue
     X = event.x
     Y = event.y
     C = verification_case(X,Y)
     grapper = False
     case_possible = case_jouable()
-    if a_manger:
+    if a_manger: #si on peut manger effectue le mouvement dedié
         C = verification_manger(X,Y,a_manger)
         if C:
             plateau.unbind("<ButtonRelease>")
@@ -760,7 +760,7 @@ def poser_jeton(event):
                 jeton_doit_joue = doit_noir_manger()
             else:
                 jeton_doit_joue = doit_blanc_manger()
-            if a_manger:
+            if a_manger: #vérifie si il y a une rafle
                 for d in a_manger:
                     if C[0] == d[0]:
                         grapper = True
@@ -780,7 +780,7 @@ def poser_jeton(event):
             for c in jeton_doit_joue:
                 plateau.itemconfig(c,outline="orange",width = 4)
             plateau.bind("<Button-1>",grap) 
-    elif not a_manger and C:
+    elif not a_manger and C: #si on peut pas manger effectue le mouvement dedié
         plateau.unbind("<ButtonRelease>")
         plateau.unbind("<Motion>")
         coord = plateau.coords(J)
@@ -797,7 +797,7 @@ def poser_jeton(event):
             for c in jeton_doit_joue:
                 plateau.itemconfig(c,outline="orange",width = 4)
             plateau.bind("<Button-1>",grap) 
-    else:
+    else: #si le joueur à lâcher son jeton sur de mauvaise coordonnées
         plateau.unbind("<ButtonRelease>")
         plateau.unbind("<Motion>")
         plateau.move(J,coord_J[0]-X,coord_J[1]-Y)
@@ -805,7 +805,7 @@ def poser_jeton(event):
             plateau.itemconfig(c,outline="orange",width = 4)
         plateau.bind("<Button-1>",grap) 
             
-def verification_manger(X,Y,a_manger):
+def verification_manger(X,Y,a_manger): #vérifie que la position du jeton lâcher correspond avec l'une de celle où on peut mangé
     for c in a_manger:
         if J == c[0] and c[2] <= X <= c[2] + 100 and c[3] <= Y <= c[3] + 100:
             return c
@@ -814,7 +814,7 @@ def verification_manger(X,Y,a_manger):
 def case_jouable():
     color = plateau.itemcget(J,"fill")
     tag = plateau.gettags(J)
-    case_possible =[]
+    case_possible =[] #crée une liste avec les cases disponnibles pour le jeton
     k = 1
     while k < 10:
         if color == "white":
@@ -860,11 +860,11 @@ def case_jouable():
     for c in case_possible:
         for d in list_jeton:
             coord2 = plateau.coords(d)
-            if coord2[0] == c[0] and coord2[1] == c[1]:
+            if coord2[0] == c[0] and coord2[1] == c[1]: #supprimer les cases disponnible avec un jeton dessus
                 case_possible.remove(c)
     return case_possible
 
-def verification_case(X,Y):
+def verification_case(X,Y): #renvoie la case sur laquel pose le jeton
     tag = plateau.gettags(J)
     k = 1
     c = []
@@ -885,7 +885,7 @@ def verification_case(X,Y):
             break
     return None
 
-def dames(d):
+def dames(d): #transformer un pion en dame en ajoutant le tag dame (sans transformation de tag)
     coord = plateau.coords(d)
     color = plateau.itemcget(d,"fill")
     if color == "white" and coord[1] == 0:
@@ -895,7 +895,7 @@ def dames(d):
         
 def fin_tour():
     global couleur,jeton_doit_joue,premier_coup
-    if couleur == "white":
+    if couleur == "white": #si avant c'était "les blancs" qui avait joué "les noirs" joue 
         couleur = "black"
         jeton_doit_joue = doit_noir_manger()
         if jeton_doit_joue:
@@ -903,27 +903,27 @@ def fin_tour():
         else:
             jeton_doit_joue = list_jeton_noir.copy()       
     else:
-        couleur = "white"
+        couleur = "white" #sinon c'est l'inverse
         jeton_doit_joue = doit_blanc_manger()
         if jeton_doit_joue:
             None
         else:
             jeton_doit_joue = list_jeton_blanc.copy()
-    jeton_doit_joue = verification_jeton(jeton_doit_joue)
-    if not list_jeton_blanc or (not jeton_doit_joue and couleur == "white"):
+    jeton_doit_joue = verification_jeton(jeton_doit_joue) #on vérifie qu'il n'y est pas de mauvais jetons dedans
+    if not list_jeton_blanc or (not jeton_doit_joue and couleur == "white"): #on regarde si il y a une victoire
         perdant = "white"
         fin_jeu(perdant)
     elif not list_jeton_noir or (not jeton_doit_joue and couleur == "black"):
         perdant = "black"
         fin_jeu(perdant)
     else:
-        if player == couleur:
+        if player == couleur: #on regarde si c'est le joueur qui joue 
             premier_coup = False
             plateau.bind("<Button-1>",grap)
             for c in jeton_doit_joue:
                 plateau.itemconfig(c,outline="orange",width = 4)
         else:
-            if premier_coup == True:
+            if premier_coup == True: #si c'est le premier coup pour éviter une attend il joura un coup pré-programmer
                 premier_coup = False
                 Coup = []
                 jeton = []
@@ -937,11 +937,11 @@ def fin_tour():
                 Coup.append(800)
                 Coup.append(500)
                 Poser_CoupIA(Coup)
-            else:
+            else: #lance l'IA
                 Coup = MinMax(None)
                 Poser_CoupIA(Coup)
     
-def Poser_CoupIA(Coup):
+def Poser_CoupIA(Coup): #exactement comme Poser_Coup sauf qu'il n'y a pas toute les vérifications car les coordonnées sont parfaite
     global jeton_doit_joue
     grapper = False
     plateau.tag_raise(Coup[0][0])
@@ -978,14 +978,14 @@ def Poser_CoupIA(Coup):
         dames(Coup[0][0])
         fin_tour()    
 
-def fin_jeu(perdant):
+def fin_jeu(perdant): 
     if perdant == "white":
         text_perdant="Les noirs ont gagné"
         text_perdant="Les blancs ont perdu"
     else:
         text_gagnant="Les blancs ont gagné"
         text_perdant="Les noirs ont perdu"
-    fin = Toplevel()
+    fin = Toplevel() #crée une fenêtre au-dessus du canvas avec le message de victoire
     fin.title("Fin")
     msg = Message(fin, text=text_gagnant)
     msg_2 = Message(fin, text=text_perdant)
@@ -993,39 +993,39 @@ def fin_jeu(perdant):
     msg_2.pack()
     plateau.bind("<Button-1>",exit_game)
 
-def exit_game(event):
+def exit_game(event): #detruit toutes les fenêtres et éteint le programme
     fenetre.destroy()
     exit()
           
-plateau = Canvas(fenetre,width=1000,height=1000)
+plateau = Canvas(fenetre,width=1000,height=1000) #création de la zone de dessin
 colone = 0
-couleur = "#F6DDCC"
+couleur = "#F6DDCC" #couleur des cases blanches
 while colone < 10:
     ligne = 0
-    while ligne < 10:
+    while ligne < 10: #créé en réaliter une case 
         if couleur == "#F6DDCC":
-            plateau.create_rectangle(colone*100,ligne*100,colone*100+100,ligne*100+100,fill=couleur)
-            couleur = "#873600"
+            plateau.create_rectangle(colone*100,ligne*100,colone*100+100,ligne*100+100,fill=couleur) #créé une case blanche stocker nulle part
+            couleur = "#873600" #change de couleur pour une case noir
         else:
-            c = plateau.create_rectangle(colone*100,ligne*100,colone*100+100,ligne*100+100,fill=couleur)
+            c = plateau.create_rectangle(colone*100,ligne*100,colone*100+100,ligne*100+100,fill=couleur) #créé une case noir qui sera stocker dans case
             case.append(c)
             if ligne < 4 and couleur == "#873600":
-                jeton = plateau.create_oval(colone*100,ligne*100,colone*100+100,ligne*100+100,fill="black",activefill="#2E2D2D")
-                list_jeton_noir.append(jeton)
+                jeton = plateau.create_oval(colone*100,ligne*100,colone*100+100,ligne*100+100,fill="black",activefill="#2E2D2D") #sur les 4 première...
+                list_jeton_noir.append(jeton) #...case noir de la colone, un jeton noir est créé et stocker dans 2 listes
                 list_jeton.append(jeton)
-            elif ligne >= 6 and couleur == "#873600":
+            elif ligne >= 6 and couleur == "#873600": #même chose pour les blancs sauf que c'est sur les 4 dernières
                 jeton = plateau.create_oval(colone*100,ligne*100,colone*100+100,ligne*100+100,fill="white",activefill="#B0AFAD")
                 list_jeton_blanc.append(jeton)
                 list_jeton.append(jeton)
-            couleur = "#F6DDCC"
+            couleur = "#F6DDCC" #change de couleur pour blanc
         ligne += 1
-    if couleur == "#F6DDCC":
-        couleur = "#873600"
+    if couleur == "#F6DDCC":   #après avoir terminé une colone, la même chose se produit sur la colone suivant seulement c'est la même couleur que...
+        couleur = "#873600"    #...la dernière case de la colone juste avant
         plateau.create_rectangle(colone*100,ligne*100,colone*100+100,ligne*100+100,fill=couleur)
     else:
        couleur = "#F6DDCC"
        plateau.create_rectangle(colone*100,ligne*100,colone*100+100,ligne*100+100,fill=couleur)
     colone += 1
-fin_tour()
-plateau.pack()
-fenetre.mainloop()
+fin_tour() #permet de passer à la suite du programme
+plateau.pack() #importe pour que le canvas soit créé
+fenetre.mainloop() #important pour que la fenêtre soit créé
