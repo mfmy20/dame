@@ -6,25 +6,25 @@ launcher.title('Launcher')
 launcher.geometry('200x100+900+450') #le 200*100 représente la taille tandis que 900+450 répresente la postion de départ
 
 player = "white" #variable de début pour éviter tout bug
-profondeur = 3
+profondeur = 5
 premier_coup = True
      
 menubar = Menu(launcher) #obligé pour crée un menu glissant
 def facile():              # fonction transformant les variables de bases
     global profondeur
-    profondeur = 2
+    profondeur = 4
 
 def moyen():
     global profondeur
-    profondeur = 3
+    profondeur = 5
 
 def difficile():
     global profondeur
-    profondeur = 4
+    profondeur = 6
     
 def impossible():
     global profondeur
-    profondeur = 5
+    profondeur = 7
 
 def joueur():
     global player
@@ -68,7 +68,8 @@ def MinMax(Rafle): #Lancement de l'IA
     list_jeton_simule = []
     jeton_blanc_simule = []
     jeton_noir_simule = []
-    maxval = -100000000             
+    alpha = -100000000
+    beta = 100000000
     for i in list_jeton_blanc:      #générent les listes de simulations 
         coord = plateau.coords(i)
         tag = plateau.gettags(i)
@@ -108,18 +109,18 @@ def MinMax(Rafle): #Lancement de l'IA
                     jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
                     jeton_noir_simule2 = deepcopy(jeton_noir_simule)
                     d2 = deepcopy(d)
-                    val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-                    if val > maxval or (val == maxval and randint(1,2) == 2):
-                        maxval = val
+                    val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1,alpha,beta)
+                    if val > alpha or (val == alpha and randint(1,2) == 2):
+                        alpha = val
                         MeilleurCoup = d
             else:
                 list_jeton_simule2 = deepcopy(list_jeton_simule)
                 jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
                 jeton_noir_simule2 = deepcopy(jeton_noir_simule)
                 d2 = deepcopy(d)
-                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-                if val > maxval or (val == maxval and randint(1,2) == 2):
-                    maxval = val
+                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1,alpha,beta)
+                if val > alpha or (val == alpha and randint(1,2) == 2):
+                    alpha = val
                     MeilleurCoup = d
     else:
         if player == "white":
@@ -139,16 +140,14 @@ def MinMax(Rafle): #Lancement de l'IA
                 jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
                 jeton_noir_simule2 = deepcopy(jeton_noir_simule)
                 action2 = deepcopy(action)
-                val = Min(action2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)#la valeur retourner par la fonction min sera égale à val
-                if val > maxval or (val == maxval and randint(1,2) == 2):
-                    maxval = val
+                val = Min(action2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1,alpha,beta)#la valeur retourner par la fonction min sera égale à val
+                if val > alpha or (val == alpha and randint(1,2) == 2):
+                    alpha = val
                     MeilleurCoup = action
     return MeilleurCoup #renvoie le coup à joué
 
-def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
+def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur,alpha,beta):
     IA = False
-    minval = 10000000000
-    maxval = -10000000000
     if d[1]:
         color = d[1][3]
         d[0][1] = d[2]
@@ -167,10 +166,12 @@ def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
                 jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
                 jeton_noir_simule2 = deepcopy(jeton_noir_simule)
                 d2 = deepcopy(d)
-                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur)
-                if val > maxval or (val == maxval and randint(1,2) == 2):
-                    maxval = val
-            return maxval
+                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1,alpha,beta)
+                if val > alpha or (val == alpha and randint(1,2) == 2):
+                    alpha = val
+                if beta <= alpha:
+                    return alpha
+            return alpha
     else:
         d[0][1] = d[2]
         d[0][2] = d[3]
@@ -197,9 +198,11 @@ def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
                 jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
                 jeton_noir_simule2 = deepcopy(jeton_noir_simule)
                 d2 = deepcopy(d)
-                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-                if val > maxval or (val == maxval and randint(1,2) == 2):
-                    minval = val
+                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1,alpha,beta)
+                if val < beta or (val == beta and randint(1,2) == 2):
+                    beta = val
+                if beta <= alpha:
+                    return beta
         else:
             for c in jeton_doit_joue:
                 case_possible = case_jouable_IA(c,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
@@ -213,15 +216,15 @@ def Min(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur):
                     jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
                     jeton_noir_simule2 = deepcopy(jeton_noir_simule)
                     action2 = deepcopy(action)
-                    val = Max(action2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-                    if val < minval or (val == minval and randint(1,2) == 2):
-                        minval = val
-    return minval
+                    val = Max(action2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1,alpha,beta)
+                    if val < beta or (val == beta and randint(1,2) == 2):
+                        beta = val
+                    if beta <= alpha:
+                        return beta
+    return beta
 
-def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur): #même chose que les deux précedents
+def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur,alpha,beta): #même chose que les deux précedents
     IA = True
-    minval = 10000000000
-    maxval = -10000000000
     if d[1]:
         d[0][1] = d[2]
         d[0][2] = d[3]
@@ -238,10 +241,12 @@ def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur): #m
                 jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
                 jeton_noir_simule2 = deepcopy(jeton_noir_simule)
                 d2 = deepcopy(d)
-                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur)
-                if val < minval or (val == minval and randint(1,2) == 2):
-                    minval = val
-            return minval
+                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1,alpha,beta)
+                if val < beta or (val == beta and randint(1,2) == 2):
+                    beta = val
+                if beta <= alpha:
+                    return beta
+            return beta
     else:
         d[0][1] = d[2]
         d[0][2] = d[3]
@@ -268,9 +273,11 @@ def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur): #m
                 jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
                 jeton_noir_simule2 = deepcopy(jeton_noir_simule)
                 d2 = deepcopy(d)
-                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-                if val > maxval or (val == maxval and randint(1,2) == 2):
-                    maxval = val
+                val = Min(d2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1,alpha,beta)
+                if val > alpha or (val == alpha and randint(1,2) == 2):
+                    alpha = val
+                if beta <= alpha:
+                    return alpha
         else:
             for c in jeton_doit_joue:
                 case_possible = case_jouable_IA(c,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule)
@@ -284,10 +291,12 @@ def Max(d,list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,profondeur): #m
                     jeton_blanc_simule2 = deepcopy(jeton_blanc_simule)
                     jeton_noir_simule2 = deepcopy(jeton_noir_simule)
                     action2 = deepcopy(action)
-                    val = Min(action2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1)
-                    if val > maxval or (val == maxval and randint(1,2) == 2):
-                        maxval = val
-    return maxval
+                    val = Min(action2,list_jeton_simule2,jeton_blanc_simule2,jeton_noir_simule2,profondeur-1,alpha,beta)
+                    if val > alpha or (val == alpha and randint(1,2) == 2):
+                        alpha = val
+                    if beta <= alpha:
+                        return alpha
+    return alpha
 
 def evaluer(list_jeton_simule,jeton_blanc_simule,jeton_noir_simule,val): 
     for c in jeton_blanc_simule: 
